@@ -2,9 +2,7 @@
 #
 # Check https://circleci.com/docs/2.0/language-go/ for more details
 # Changed from 2.0 to 2.1 so orbs can be used.
-version: 2.1
-orbs:
-  anchore: anchore/anchore-engine@1.6.0
+version: 2.0
 jobs:
   build:
     docker:
@@ -31,14 +29,17 @@ jobs:
       - run: go build cmd/pocket_core/main.go
       - run: go test ./tests/unit/...
       - run: go test ./tests/bdd/...
-  local_image_scan:
-      executor: anchore/anchore_engine
-      steps:
-          - checkout
-          - run:
-              name: Building Pocket Container
-              command: docker build -t ${CIRCLE_PROJECT_REPONAME}:ci .
-          - anchore/analyze_local_image:
-              dockerfile_path: ./Dockerfile
-              image_name: ${CIRCLE_PROJECT_REPONAME}:ci
-              timeout: '500'
+  deployment_build:
+    docker:
+      - image: circleci/golang:1.11
+    steps:
+      - checkout
+      - run:
+          name: Trigger Pocket Core Deployment build.
+          command: "curl -u ${CIRCLE_API_USER_TOKEN} -X POST --header 'Content-Type: application/json' https://circleci.com/api/v2/project/github/pokt-network/pocket-core-deployments/pipeline "
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
+      - deployment_build
