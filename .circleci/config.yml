@@ -36,7 +36,13 @@ jobs:
       - checkout
       - run:
           name: Trigger Pocket Core Deployment build.
-          command: "curl -u ${CIRCLE_API_USER_TOKEN} -X POST --header 'Content-Type: application/json' https://circleci.com/api/v2/project/github/pokt-network/pocket-core-deployments/pipeline "
+          command: "curl -u ${CIRCLE_API_USER_TOKEN}: -X POST -H \"Content-Type: application/json\" \
+          -d \"'{
+            \"parameters\":{
+              \"BRANCH_NAME\":\"${CIRCLE_BRANCH}\"
+              }
+            }'\"
+          https://circleci.com/api/v2/project/github/pokt-network/pocket-core-deployments/pipeline "
 workflows:
   version: 2
   build_and_test:
