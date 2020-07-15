@@ -91,7 +91,7 @@ jobs:
 # Workflow definitions
 workflows:
   version: 2
-  build-test-deploy:
+  build-test:
     jobs:
       - build
       - test:
@@ -105,6 +105,28 @@ workflows:
               only:
                 - staging
                 - master
+  build-test-deploy:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only:
+                - /^RC-.*/
+                - /^stable-.*/
+                - /([0-9]|[0-9][0-9])\.([0-9]|[0-9][0-9])\.([0-9]|[0-9][0-9])/
+            branches:
+              ignore: /.*/
+      - test:
+          requires:
+            - build
+          filters:
+            tags:
+              only:
+                - /^RC-.*/
+                - /^stable-.*/
+                - /([0-9]|[0-9][0-9])\.([0-9]|[0-9][0-9])\.([0-9]|[0-9][0-9])/
+            branches:
+              ignore: /.*/
       - trigger-pocket-core-deployments-tags:
           requires:
             - test
@@ -113,6 +135,7 @@ workflows:
               only:
                 - /^RC-.*/
                 - /^stable-.*/
+                - /([0-9]|[0-9][0-9])\.([0-9]|[0-9][0-9])\.([0-9]|[0-9][0-9])/
             branches:
               ignore: /.*/
 
